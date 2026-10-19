@@ -18,3 +18,12 @@ jobs:
       - run: npm test
       - run: npm run scan
       - run: docker build -t telegram-chatgpt:test .
+      - name: Test the running container through HTTP and OAuth
+        run: |
+          node scripts/configure.mjs --domain http://localhost:3000 > /dev/null
+          docker run -d --name telegram-smoke --env-file .env -e HOST=0.0.0.0 -p 127.0.0.1:3000:3000 telegram-chatgpt:test
+          node --input-type=module -e "for(let i=0;i<30;i++){try{if((await fetch('http://localhost:3000/health')).ok)process.exit(0)}catch{}await new Promise(r=>setTimeout(r,1000))}process.exit(1)"
+          node --env-file=.env scripts/smoke-server.mjs http://localhost:3000
+      - name: Stop the test container
+        if: always()
+        run: docker rm -f telegram-smoke || true
