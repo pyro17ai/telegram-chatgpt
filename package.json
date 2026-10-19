@@ -1,0 +1,29 @@
+{
+  "name": "telegram-chatgpt",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "configure": "node scripts/configure.mjs",
+    "build": "node scripts/build.mjs",
+    "build:server": "node scripts/build-server.mjs",
+    "start": "node --env-file=.env dist/node/server.mjs",
+    "test": "node scripts/test-storage.mjs && node scripts/test-dialogs-compat.mjs && node scripts/test-executor.mjs && node --test tests/*.test.mjs",
+    "scan": "node scripts/scan-secrets.mjs",
+    "package:plugin": "node scripts/package-plugin.mjs"
+  },
+  "dependencies": {
+    "@jitl/quickjs-wasmfile-release-sync": "0.32.0",
+    "@mtcute/core": "0.32.2",
+    "@mtcute/web": "0.32.2",
+    "drizzle-kit": "0.31.11",
+    "drizzle-orm": "0.45.3",
+    "esbuild": "0.28.2",
+    "quickjs-emscripten-core": "0.32.0",
+    "sucrase": "3.35.1"
+  },
+  "license": "MIT",
+  "engines": {
+    "node": ">=24"
+  }
+}

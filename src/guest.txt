@@ -1,0 +1,51 @@
+const __cache = new Map();
+function __encode(x){
+  if(x===undefined)return {$type:'undefined'};
+  if(typeof x==='bigint')return {$type:'bigint',value:String(x)};
+  if(x===null||typeof x!=='object'&&typeof x!=='function')return x;
+  if(x.__nativeRef!==undefined)return {$type:'ref',id:x.__nativeRef};
+  if(x instanceof Date)return {$type:'date',value:x.toISOString()};
+  if(x instanceof Uint8Array)return {$type:'bytes',value:Array.from(x)};
+  if(Array.isArray(x))return x.map(__encode);
+  if(typeof x==='function')throw new Error('Callbacks SDK требуют отдельного адаптера. Локальные функции внутри кода поддерживаются.');
+  return Object.fromEntries(Object.entries(x).map(([k,v])=>[k,__encode(v)]));
+}
+function __revive(x){
+  if(x===null||typeof x!=='object')return x;
+  if(x.$type==='undefined')return undefined;
+  if(x.$type==='bigint')return BigInt(x.value);
+  if(x.$type==='date')return new Date(x.value);
+  if(x.$type==='bytes')return new Uint8Array(x.value);
+  if(x.$type==='ref'){
+    if(__cache.has(x.id))return __cache.get(x.id);
+    const target=x.callable?function(){}:{};
+    const value=new Proxy(target,{
+      get(t,p){
+        if(p==='__nativeRef')return x.id;
+        if(p==='then')return undefined;
+        if(p===Symbol.asyncIterator)return ()=>value;
+        if(p===Symbol.toStringTag)return x.name||'SDKObject';
+        if(p===Symbol.toPrimitive)return ()=>__get(x.id,'toString')();
+        if(typeof p==='symbol')return undefined;
+        return __get(x.id,p);
+      },
+      apply(t,receiver,args){return __call(x.id,JSON.stringify(__encode(args)));},
+      construct(t,args){return __construct(x.id,JSON.stringify(__encode(args)));},
+      ownKeys(){return __keys(x.id);},
+      getOwnPropertyDescriptor(t,p){return {configurable:true,enumerable:true,writable:false,value:__get(x.id,String(p))};},
+    });
+    __cache.set(x.id,value);return value;
+  }
+  if(Array.isArray(x))return x.map(__revive);
+  return Object.fromEntries(Object.entries(x).map(([k,v])=>[k,__revive(v)]));
+}
+const console={log:(...args)=>__log(args.map(x=>typeof x==='string'?x:JSON.stringify(x,(_k,v)=>typeof v==='bigint'?String(v):v)).join(' ')),info:(...x)=>console.log(...x),warn:(...x)=>console.log(...x),error:(...x)=>console.log(...x)};
+async function withTelegram(callback){const {tg,me}=await __connect();return await callback(tg,me);}
+const fetch=(url,options)=>__fetch(String(url),JSON.stringify(__encode(options||{})));
+const files={read:(path)=>__file('read',String(path)),write:(path,data)=>__file('write',String(path),String(data)),list:()=>__file('list','')};
+const require=(name)=>{
+  if(name.endsWith('/scripts/client.ts')||name==='telegram-account-sdk')return {withTelegram};
+  if(name==='@mtcute/bun@0.32.2'||name==='@mtcute/bun'||name==='@mtcute/core'||name==='@mtcute/web')return __sdk();
+  if(name==='long')return __long();
+  throw new Error('Модуль не установлен в Sites: '+name+'. Доступны mtcute, long и telegram-account-sdk.');
+};

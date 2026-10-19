@@ -1,0 +1,4 @@
+interface:
+  display_name: "Telegram через SDK"
+  short_description: "Личный аккаунт Telegram через mtcute и Bun"
+  default_prompt: "Используй $telegram-account-sdk для работы с моим личным Telegram через SDK по текущему поручению."

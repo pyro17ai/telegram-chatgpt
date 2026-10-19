@@ -1,0 +1,16 @@
+node_modules/
+dist/
+.sites-runtime/
+.env
+.env.*
+!.env.example
+data/
+*.session
+*.sqlite*
+*.db
+*.log
+*.zip
+*.tar.gz
+.DS_Store
+coverage/
+.secrets/

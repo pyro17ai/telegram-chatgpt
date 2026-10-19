@@ -1,0 +1,9 @@
+.git
+node_modules
+dist
+.env
+.env.*
+data
+.sites-runtime
+*.zip
+*.log

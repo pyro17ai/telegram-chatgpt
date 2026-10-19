@@ -1,0 +1,20 @@
+{
+  "version": "7",
+  "dialect": "sqlite",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "6",
+      "when": 1791382494912,
+      "tag": "0000_uneven_penance",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1792399585584,
+      "tag": "0001_auth",
+      "breakpoints": true
+    }
+  ]
+}

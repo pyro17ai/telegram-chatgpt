@@ -1,0 +1,15 @@
+# Развёртывание новой личной копии на ChatGPT Sites
+
+Эту инструкцию выполняет агент с установленными Sites и Plugin Creator. Прочитай их текущие навыки и справку Sites по MCP и секретам. Используй штатные инструменты платформы; не выдумывай Sites CLI. Создай новую установку, не подставляй идентификатор существующего сайта.
+
+1. Склонируй репозиторий в новую рабочую папку. В шаблоне `.openai/hosting.json` уже указаны D1 `DB`, R2 `BUCKET` и `capabilities:["mcp"]`. Здесь нет `project_id`. Создай приватный Site, сохрани возвращённый `project_id` штатным helper и открой его исходники по workflow Sites. При использовании retained template исключи `.git`, `.env`, `data`, `dist`, `node_modules` и любые настройки другой установки. Сохрани наш Worker ESM entrypoint и сборку WASM.
+
+2. Настрой env через штатный `sites_update_environment_variables`: `DEPLOY_TARGET=sites`, `PUBLIC_ORIGIN` равный точному HTTPS origin созданного сайта, `TG_OWNER_EMAIL` равный email владельца, `TG_STATE_KEY` равный новым случайным 32 байтам в base64. Ключ сгенерируй криптографически и передай из памяти; пометь его как secret. Email владельца также можно хранить как secret. Сначала используй сведения об аккаунте, возвращённые Sites; если email недоступен, спроси только email. Никогда не проси Telegram API Hash, OTP или 2FA в чате. `SETUP_TOKEN` на Sites не нужен: сайт использует ChatGPT sign-in. Не публикуй эти значения в Git, hosting.json, журнале или тексте ответа.
+
+3. Установи зависимости `npm ci`. Проверь `npm run build` и `npm test`; сборка создаёт `dist/server/index.js` и два WASM-модуля. Упакуй через актуальный source helper Sites. Архив должен содержать `.openai/hosting.json`, сборку Worker с WASM и миграции `drizzle`. Сохрани и опубликуй точный pushed commit штатным приватным deploy. Дождись `succeeded`. Sites сама создаёт D1/R2 и применяет миграции. Не выполняй DDL при HTTP-запросах.
+
+После публикации получи `get_site({project_id,include_mcp_connection:true})`. Сохрани точный canonical `plugin_id` из ответа. Не создавай отдельную App-обёртку. Прочитай `get_plugin_files` и добавь директории `skills/telegram-account-sdk` и `skills/telegram-sites-runtime` через `update_plugin`, сохраняя App binding и метаданные; используй текущий `expected_release_id`. Обновление сервера не должно заменять навыки пакетом без skills. При желании задай `PLUGIN_URL` точной ссылкой из ответа платформы и повторно опубликуй конфигурацию, сохраняя приватность.
+
+Дай владельцу ссылку на Site для ввода Telegram API ID/API Hash и номера. Код Telegram и 2FA он вводит только в форме. После этого установи/подключи канонический плагин штатным workflow или укажи Plugins → Personal → Created by you. Проверь реальный инструмент `runtime_diagnostics`, затем `withTelegram(async(tg,me)=>console.log({id:me.id,isBot:me.isBot}))`. Не отмечай сообщения прочитанными и не отправляй сообщения ради проверки.
+
+PUBLIC_ORIGIN и owner email не должны быть пустыми. Сервер отказывает в доступе при отсутствии владельца. Не делай Site публичным ради доступности MCP: Sites предоставляет собственное подключение и проверку пользователя.

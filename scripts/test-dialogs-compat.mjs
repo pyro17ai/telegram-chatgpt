@@ -1,0 +1,16 @@
+import assert from 'node:assert/strict';
+import {installDialogCompatibility} from '../src/dialogs-compat.js';
+const calls=[];
+const empty={_:'dialogFilterChatlist',id:2,title:{text:'AI Chats'},pinnedPeers:[],includePeers:[{id:1}]};
+const pinned={...empty,id:3,title:{text:'Pinned'},pinnedPeers:[{id:2}]};
+const client={getFolders:async()=>({filters:[empty,pinned]}),async *iterDialogs(params){calls.push(params);yield 1;}};
+installDialogCompatibility(client);
+const collect=async p=>{const all=[];for await(const d of client.iterDialogs(p))all.push(d);return all;};
+assert.deepEqual(await collect({folder:'AI Chats'}),[1]);assert.equal(calls.at(-1).pinned,'keep');assert.equal(calls.at(-1).folder,empty);
+const count=calls.length;assert.deepEqual(await collect({folder:empty,pinned:'only'}),[]);assert.equal(calls.length,count);
+await collect({folder:'Pinned'});assert.equal(calls.at(-1).pinned,undefined);
+await collect({folder:empty,filter:{pinnedPeers:[{id:7}]}});assert.equal(calls.at(-1).pinned,undefined);
+await collect({limit:1});assert.deepEqual(calls.at(-1),{limit:1});
+assert.deepEqual(await collect({limit:0}),[]);
+await collect({folder:'missing'});assert.equal(calls.at(-1).folder,'missing');
+console.log('PASS: empty pinned folder, pinned-only, pinned peers, filter override, default dialogs, zero limit, unknown folder');
