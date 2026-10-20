@@ -5,7 +5,7 @@
 </style>
 <main><header><div class="mark">↗</div><div><span>Telegram</span><br><small>Ваш аккаунт в ChatGPT</small></div></header>
 <section><div id="loading">Проверяю подключение…</div>
-<form id="owner" hidden><h1>Вход владельца</h1><p>Введите ключ, который установщик показал в терминале. Он защищает эту страницу и подключение ChatGPT.</p><label for="token">Ключ владельца</label><input id="token" type="password" autocomplete="current-password" required><button class="full">Войти</button></form>
+<form id="owner" hidden><h1>Вход владельца</h1><p>Откройте персональную ссылку из установщика или введите ключ владельца из приватного файла .env. Он защищает эту страницу и подключение ChatGPT.</p><label for="token">Ключ владельца</label><input id="token" type="password" autocomplete="current-password" required><button class="full">Войти</button></form>
 <form id="credentials" hidden><h1>Подключите Telegram</h1><p>Получите API ID и API Hash в разделе <a href="https://my.telegram.org/apps" target="_blank" rel="noreferrer">API development tools</a>. Данные сохранятся зашифрованными на вашем сервере.</p><label for="apiId">API ID</label><input id="apiId" inputmode="numeric" type="number" min="1" required><label for="apiHash">API Hash</label><input id="apiHash" type="password" autocomplete="off" minlength="32" maxlength="32" required><label for="phone">Номер телефона</label><input id="phone" type="tel" autocomplete="tel" placeholder="+79991234567" required><button class="full">Получить код</button></form>
 <form id="code" hidden><h1>Введите код</h1><p>Telegram пришлёт код в приложение или другим доступным способом. Не закрывайте эту страницу.</p><label for="otp">Код Telegram</label><input id="otp" inputmode="numeric" autocomplete="one-time-code" required><button class="full">Продолжить</button></form>
 <form id="password" hidden><h1>Двухэтапная проверка</h1><p>Введите облачный пароль Telegram. Сервер использует его только для этого входа.</p><label for="twofa">Пароль 2FA</label><input id="twofa" type="password" autocomplete="off" required><button class="full">Подключить</button></form>
@@ -24,5 +24,15 @@ $('credentials').onsubmit=e=>submit(e,async()=>{const data={apiId:Number($('apiI
 $('code').onsubmit=e=>submit(e,async()=>{const code=$('otp').value.replace(/\s/g,'');$('otp').value='';const s=await request('/api/telegram/code',{code});show(s.stage);if(s.stage==='connected')await refresh();});
 $('password').onsubmit=e=>submit(e,async()=>{const password=$('twofa').value;$('twofa').value='';const s=await request('/api/telegram/password',{password});show(s.stage);if(s.stage==='connected')await refresh();});
 $('restart').onclick=e=>submit(e,async()=>{await request('/api/telegram/cancel',{});show('credentials');});
-refresh().catch(e=>{show('owner');$('error').textContent=e.message;$('error').hidden=false;});
+async function enterFromLink(){
+ const token=new URLSearchParams(location.hash.slice(1)).get('setup');
+ if(token!==null){
+  // Убираем ключ до запроса или перехода. Фрагмент URL не передаётся серверу.
+  history.replaceState(null,'',location.pathname+location.search);
+  if(!/^[a-f0-9]{64}$/.test(token))throw new Error('Некорректная ссылка владельца. Введите ключ вручную.');
+  await request('/api/login',{token});
+ }
+ await refresh();
+}
+enterFromLink().catch(e=>{show('owner');$('error').textContent=e.message;$('error').hidden=false;});
 </script></html>

@@ -9,6 +9,7 @@ import {createStorage} from '../server/storage.mjs';
 import {readState,writeState} from '../src/storage.js';
 import {putAuth} from '../src/auth.js';
 import {sha} from '../src/http.js';
+import {checkDeployment} from '../scripts/check-deployment.mjs';
 const dir=fs.mkdtempSync(path.join(os.tmpdir(),'telegram-bridge-test-'));
 const data=createStorage(dir);const secret=crypto.randomBytes(32).toString('hex');
 const env={...data,DEPLOY_TARGET:'server',PUBLIC_ORIGIN:'http://localhost:3000',TG_STATE_KEY:crypto.randomBytes(32).toString('base64'),SETUP_TOKEN:secret};
@@ -86,4 +87,14 @@ test('failed sendCode and expired code return to credentials; restart is explici
 test('failed login flood cannot lock out a valid owner key',async()=>{
  for(let i=0;i<12;i++)await worker.fetch(req('/api/login',{token:'wrong'}),env);
  assert.equal((await worker.fetch(req('/api/login',{token:secret}),env)).status,200);
+});
+test('free hostname is used consistently by live OAuth and the generated plugin',async()=>{
+ const configured={...env,PUBLIC_ORIGIN:'https://telegram.93-184-216-34.sslip.io'};
+ await checkDeployment(configured.PUBLIC_ORIGIN,(url,options)=>worker.fetch(new Request(url,options),configured));
+ const login=await worker.fetch(new Request(configured.PUBLIC_ORIGIN+'/api/login',{method:'POST',headers:{'content-type':'application/json',origin:configured.PUBLIC_ORIGIN},body:JSON.stringify({token:secret})}),configured);
+ assert.equal(login.status,200);
+ const ownerCookie=login.headers.get('set-cookie').split(';')[0];
+ const archive=await worker.fetch(new Request(configured.PUBLIC_ORIGIN+'/plugin.zip',{headers:{cookie:ownerCookie}}),configured);
+ assert.equal(archive.status,200);
+ assert.ok(Buffer.from(await archive.arrayBuffer()).includes(Buffer.from(configured.PUBLIC_ORIGIN+'/mcp')));
 });

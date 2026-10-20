@@ -17,6 +17,10 @@ jobs:
       - run: npm run build:server
       - run: npm test
       - run: npm run scan
+      - run: bash -n scripts/deploy.sh
+      - name: Validate automatic free-address HTTPS configuration
+        run: |
+          docker run --rm -e DOMAIN=telegram.93-184-216-34.sslip.io -v "$PWD/Caddyfile:/etc/caddy/Caddyfile:ro" caddy:2-alpine caddy validate --config /etc/caddy/Caddyfile --adapter caddyfile
       - run: docker build -t telegram-chatgpt:test .
       - name: Test the running container through HTTP and OAuth
         run: |

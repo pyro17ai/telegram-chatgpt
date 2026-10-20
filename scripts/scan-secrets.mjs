@@ -9,6 +9,7 @@ const rules=[
  ['environment-secret',/^(?:TG_STATE_KEY|SETUP_TOKEN|TG_SERVICE_KEY|TELEGRAM_API_HASH|OPENAI_API_KEY)[ \t]*=[ \t]*[A-Za-z0-9+/_=-]{20,}[ \t]*$/m],
  ['cloud-key',/\b(?:AKIA[0-9A-Z]{16}|sk-proj-[A-Za-z0-9_-]{30,})\b/],
  ['credential-url',/https?:\/\/[^\s/@]+:[^\s/@]+@/],
+ ['owner-login-link',/#setup=[a-f0-9]{64}\b/],
  ['personal-installation',/\/Users\/[a-zA-Z0-9._-]+\/|\b(?:appgprj|appgdep|asdk_app_sites)_[a-f0-9]{20,}\b/],
 ];
 const forbidden=/(^|\/)(?:\.env(?:\.(?!example$)[^/]+)?|data|node_modules|\.sites-runtime|\.DS_Store)(?:\/|$)|\.(?:session|sqlite(?:-wal|-shm)?|db|pem|p12)$/;
