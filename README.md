@@ -8,14 +8,14 @@
 
 **Покупать домен и регистрировать аккаунт для адреса не нужно.** Передайте агенту ссылку на этот репозиторий и SSH-доступ к серверу:
 
-> Разверни https://github.com/pyro17ai/telegram-chatgpt на моём сервере. Выполни AGENTS.md и docs/deploy-server.md: установи зависимости, получи бесплатный постоянный адрес и проверь HTTPS с OAuth. Верни персональную ссылку для входа и инструкцию добавления плагина в веб-версию ChatGPT. Telegram-реквизиты я введу сам на странице.
+> Разверни https://github.com/pyro17ai/telegram-sdk-plugin на моём сервере. Выполни AGENTS.md и docs/deploy-server.md: установи зависимости, получи бесплатный постоянный адрес и проверь HTTPS с OAuth. Верни персональную ссылку для входа и инструкцию добавления плагина в веб-версию ChatGPT. Telegram-реквизиты я введу сам на странице.
 
 Агент выполнит настройку. Вам останется открыть персональную ссылку, войти в Telegram и добавить плагин в ChatGPT.
 
 Для самостоятельного запуска нужны Git и Docker с Compose на сервере с публичным IPv4. Node.js на сервер устанавливать не нужно. Входящие TCP-порты 80 и 443 должны быть доступны:
 
 ```bash
-git clone https://github.com/pyro17ai/telegram-chatgpt.git && cd telegram-chatgpt
+git clone https://github.com/pyro17ai/telegram-sdk-plugin.git && cd telegram-sdk-plugin
 bash scripts/deploy.sh
 ```
 
@@ -35,7 +35,7 @@ bash scripts/deploy.sh
 
 Установите Sites и Plugin Creator, затем дайте агенту эту инструкцию:
 
-> Разверни для меня https://github.com/pyro17ai/telegram-chatgpt как новый приватный ChatGPT Site. Выполни docs/deploy-sites.md. Создай новую установку с собственным ключом шифрования и привяжи оба навыка к каноническому плагину Sites. Telegram-реквизиты я введу сам через страницу после публикации. Существующие сайты не изменяй.
+> Разверни для меня https://github.com/pyro17ai/telegram-sdk-plugin как новый приватный ChatGPT Site. Выполни docs/deploy-sites.md. Создай новую установку с собственным ключом шифрования и привяжи оба навыка к каноническому плагину Sites. Telegram-реквизиты я введу сам через страницу после публикации. Существующие сайты не изменяй.
 
 Агент создаст личный Site и плагин. После публикации откройте страницу, войдите в Telegram и установите плагин из **Plugins → Personal → Created by you**. [Полная инструкция для агента](docs/deploy-sites.md). Публичного терминального CLI Sites этот проект не предполагает.
 
